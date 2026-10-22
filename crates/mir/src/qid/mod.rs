@@ -43,6 +43,7 @@ pub use table::ResourceTable;
 /// rule is checked by the verification logic; it is an error for a complete MIR transformation to
 /// leave reachable instructions in place that violate the overlap rules.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, bytemuck::Zeroable)]
+#[cfg_attr(feature = "mem_dbg", derive(mem_dbg::MemSize, mem_dbg::MemDbg))]
 #[repr(transparent)]
 pub struct Qid(u32);
 impl Qid {
@@ -196,6 +197,7 @@ impl QidSpace {
 /// Logically this is just a two-tuple of `(Qid, u32)`, but with an internal trick to make
 /// `Option<QidBit>` the same size as `QidBit`.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[cfg_attr(feature = "mem_dbg", derive(mem_dbg::MemSize, mem_dbg::MemDbg))]
 pub struct QidBit {
     qid: Qid,
     /// The bitwise negation of the index.

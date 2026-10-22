@@ -12,12 +12,20 @@ doctest = false
 [lints]
 workspace = true
 
+[features]
+mem_dbg = ["dep:mem_dbg"]
+
 [dependencies]
 bytemuck.workspace = true
 hashbrown.workspace = true
+mem_dbg = { workspace = true, optional = true }
 qiskit-util.workspace = true
 rustworkx-core.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
 itertools.workspace = true
+
+[[example]]
+name = "mir_memory"
+required-features = ["mem_dbg"]

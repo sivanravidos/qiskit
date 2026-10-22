@@ -37,6 +37,7 @@ use std::{mem, num, ops};
 /// The various iteration methods typically have an [`indexed`](iter::Iter::indexed) method, which
 /// attaches the [`Index`] of each node, similar to [`Iterator::enumerate`].
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "mem_dbg", derive(mem_dbg::MemSize, mem_dbg::MemDbg))]
 pub struct LineGraph<T> {
     /// The individual slots that make up the graph.
     ///
@@ -425,7 +426,8 @@ impl<T> ops::IndexMut<Index> for LineGraph<T> {
 
 /// A slot in the graph.
 #[derive(Clone, Copy, Debug)]
-enum Slot<T> {
+#[cfg_attr(feature = "mem_dbg", derive(mem_dbg::MemSize, mem_dbg::MemDbg))]
+pub enum Slot<T> {
     /// Actual data.
     Data(Node<T>),
     /// An entry in the free list.  The payload is the next index (if any) in the chain.
@@ -443,6 +445,7 @@ enum Slot<T> {
 #[derive(
     Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash, bytemuck::TransparentWrapper,
 )]
+#[cfg_attr(feature = "mem_dbg", derive(mem_dbg::MemSize, mem_dbg::MemDbg))]
 #[repr(transparent)]
 // The use of `NonZeroU32` is not intended to be API exposed or binding.  It would be better to use
 // `u32::MAX` as the sentinel "bad" value, but it's hard to spell that _and_ permit the `Option<T>`
@@ -491,6 +494,7 @@ unsafe impl bytemuck::PodInOption for Index {}
 ///
 /// This includes references to the node weight and its predecessor and successor edges (if any).
 #[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "mem_dbg", derive(mem_dbg::MemSize, mem_dbg::MemDbg))]
 pub struct Node<T> {
     weight: T,
     next: Option<Index>,
@@ -1121,5 +1125,18 @@ mod tests {
             .collect::<Vec<_>>();
         indices_main_rev.reverse();
         assert_eq!(indices.as_slice(), indices_main_rev.as_slice());
+    }
+
+    #[cfg(feature = "mem_dbg")]
+    #[test]
+    fn test_line_graph_mem_size() {
+        use mem_dbg::{MemSize, SizeFlags};
+
+        let mut g = LineGraph::<u32>::new();
+        for i in 0..10 {
+            g.push_back(i);
+        }
+        let size = g.mem_size(SizeFlags::default());
+        assert!(size > 0);
     }
 }
