@@ -54,6 +54,10 @@ impl MirInstruction {
         &self.qids
     }
 
+    pub fn set_qids(&mut self, qids: QidList) {
+        self.qids = qids;
+    }
+
     pub fn args(&self) -> &SymbolIdList {
         &self.args
     }
@@ -193,4 +197,22 @@ mod tests {
     //         Err(MirVerifierError::MismatchedOperands { len1: 8, len2: 4 })
     //     ));
     // }
+
+    #[test]
+    fn test_get_set_qids() {
+        let qids_list1 = QidList::new(vec![Qid::virt(0), Qid::virt(1)]);
+        let qids_list2 = QidList::new(vec![Qid::virt(1), Qid::virt(0)]);
+        let mut instr = MirInstruction {
+            op: create_pauli_rotation_op(Pauli::I, 2, 0.5),
+            qids: qids_list1.clone(),
+            args: SymbolIdList::default(),
+            returns: SymbolIdList::default(),
+        };
+        // Check get
+        assert_eq!(*instr.qids(), qids_list1);
+
+        // Replace qids and assert they were replaced
+        instr.set_qids(qids_list2.clone());
+        assert_eq!(*instr.qids(), qids_list2);
+    }
 }
